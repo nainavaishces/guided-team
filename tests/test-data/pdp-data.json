@@ -1,0 +1,30 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "slug": "aim-short-charcoal",
+      "title": "Aim Short",
+      "subtitle": "Men's Chino Shorts",
+      "price": "$74",
+      "color": "Charcoal",
+      "sizeOptions": ["28", "30", "31", "32", "33", "34", "36", "38"],
+      "size": "32"
+    },
+    {
+      "id": "2",
+      "slug": "womens-pose-plyo-tank-black",
+      "title": "Pose Plyo Tank",
+      "subtitle": "Women's Rib Tank",
+      "price": "$64",
+      "color": "Black"
+    },
+    {
+      "id": "3",
+      "slug": "elevation-blazer-shiitake-heather",
+      "title": "Elevation Blazer",
+      "subtitle": "Men's Lightweight Jacket",
+      "price": "$198",
+      "color": "Shiitake Heather"
+    }
+  ]
+}

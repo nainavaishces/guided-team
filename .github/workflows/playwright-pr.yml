@@ -1,0 +1,151 @@
+name: Playwright PR Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+# Add permissions needed for PR comments
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Create test summary file
+        run: |
+          echo '{
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "flaky": 0,
+            "skipped": 0
+          }' > test-summary.json
+
+      - name: Run Playwright tests
+        id: playwright
+        run: |
+          # Run tests and capture output
+          OUTPUT=$(npm run test:chrome 2>&1) || true
+          echo "$OUTPUT"
+
+          # Extract test counts using grep and sed
+          PASSED=$(echo "$OUTPUT" | grep -o '[0-9]* passed' | head -1 | sed 's/ passed//')
+          FAILED=$(echo "$OUTPUT" | grep -o '[0-9]* failed' | head -1 | sed 's/ failed//')
+          FLAKY=$(echo "$OUTPUT" | grep -o '[0-9]* flaky' | head -1 | sed 's/ flaky//')
+          SKIPPED=$(echo "$OUTPUT" | grep -o '[0-9]* skipped' | head -1 | sed 's/ skipped//')
+
+          # Set defaults if not found
+          PASSED=${PASSED:-0}
+          FAILED=${FAILED:-0}
+          FLAKY=${FLAKY:-0}
+          SKIPPED=${SKIPPED:-0}
+
+          # Calculate total from the individual counts
+          TOTAL=$((PASSED + FAILED + FLAKY + SKIPPED))
+
+          # Create JSON summary
+          echo "{
+            \"total\": $TOTAL,
+            \"passed\": $PASSED,
+            \"failed\": $FAILED,
+            \"flaky\": $FLAKY,
+            \"skipped\": $SKIPPED
+          }" > test-summary.json
+
+          # Show summary
+          echo "Test Summary:"
+          echo "Total: $TOTAL"
+          echo "Passed: $PASSED"
+          echo "Failed: $FAILED"
+          echo "Flaky: $FLAKY"
+          echo "Skipped: $SKIPPED"
+        env:
+          CI: true
+          TEST_ENV: staging
+          HEADLESS: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-pr
+          path: |
+            playwright-report/
+            reports/html-report/
+            reports/screenshots/
+            test-summary.json
+          retention-days: 7
+
+      - name: Add PR comment with test results
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            // Get the URL for the workflow run
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // Read test results
+            let results = { total: 0, passed: 0, failed: 0, flaky: 0, skipped: 0 };
+            try {
+              if (fs.existsSync('test-summary.json')) {
+                results = JSON.parse(fs.readFileSync('test-summary.json', 'utf8'));
+                console.log('Test results loaded from summary file:', results);
+              } else {
+                console.log('Test summary file not found');
+              }
+            } catch (error) {
+              console.error('Error reading test results:', error);
+            }
+
+            // Calculate success rate
+            const successRate = results.total > 0 
+              ? Math.round((results.passed / results.total) * 100) 
+              : 0;
+
+            // Create a detailed comment with test results
+            const body = `## Playwright Test Results
+
+            | Status | Count |
+            | ------ | ----- |
+            | ✅ Passed | ${results.passed} |
+            | ❌ Failed | ${results.failed} |
+            | ⚠️ Flaky | ${results.flaky} |
+            | ⏭️ Skipped | ${results.skipped} |
+            | 📊 Total | ${results.total} |
+            | 🎯 Success Rate | ${successRate}% |
+
+            ### Links
+            - [View workflow run details](${runUrl})
+
+            > To download artifacts: Go to the workflow run, click on the "Artifacts" dropdown, and select "playwright-report-pr"
+            `;
+
+            // Post the comment to the PR
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
