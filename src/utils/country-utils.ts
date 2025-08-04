@@ -64,3 +64,27 @@ export function getEnvironmentCountryConfig(
 export function getBaseUrl(countryConfig: CountryConfig): string {
   return `https://${countryConfig.domain}`;
 }
+
+/**
+ * Parse a deploy preview URL and set the appropriate environment variables
+ * @param deployPreviewUrl - The deploy preview URL
+ * @returns True if the URL was successfully parsed, false otherwise
+ */
+export function parseDeployPreviewUrl(deployPreviewUrl: string): boolean {
+  if (!deployPreviewUrl) {
+    return false;
+  }
+
+  try {
+    // Set the DEPLOY_PRIME_URL environment variable
+    process.env.DEPLOY_PRIME_URL = deployPreviewUrl;
+
+    // Set the CONTEXT environment variable
+    process.env.CONTEXT = 'deploy-preview';
+
+    return true;
+  } catch (error) {
+    console.error('Error parsing deploy preview URL:', error);
+    return false;
+  }
+}

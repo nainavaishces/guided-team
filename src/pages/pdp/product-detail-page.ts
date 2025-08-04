@@ -4,6 +4,7 @@ import { ColorSelectorComponent } from '../../components/pdp/color-selector-comp
 import { ProductCTAComponent } from '../../components/pdp/product-cta-component';
 import { ProductGalleryComponent } from '../../components/pdp/product-gallery-component';
 import { ProductInfoComponent } from '../../components/pdp/product-info-component';
+import { ReviewsComponent } from '../../components/pdp/reviews-component';
 import { SizeSelectorComponent } from '../../components/pdp/size-selector-component';
 import { IComponentProps } from '../../types/component-types';
 import { IPageProps } from '../../types/page-types';
@@ -21,6 +22,7 @@ export class ProductDetailPage extends BasePage {
   private readonly colorSelector: ColorSelectorComponent;
   private readonly sizeSelector: SizeSelectorComponent;
   private readonly productCTA: ProductCTAComponent;
+  private readonly reviews: ReviewsComponent;
 
   /**
    * Creates a new ProductDetailPage instance
@@ -46,6 +48,12 @@ export class ProductDetailPage extends BasePage {
     this.colorSelector = new ColorSelectorComponent(componentProps);
     this.sizeSelector = new SizeSelectorComponent(componentProps);
     this.productCTA = new ProductCTAComponent(componentProps);
+
+    // Initialize reviews component with page as root since it spans multiple sections
+    this.reviews = new ReviewsComponent({
+      page,
+      rootLocator: page.locator('body'),
+    });
   }
 
   /**
@@ -94,5 +102,55 @@ export class ProductDetailPage extends BasePage {
    */
   getProductSection(): Locator {
     return this.productSection;
+  }
+
+  /**
+   * Selects the first available size and inseam options.
+   */
+  async selectFirstAvailableSizeAndInseam(): Promise<void> {
+    logger.debug('Selecting first available size and inseam');
+    await this.sizeSelector.selectFirstAvailableSizeAndInseam();
+  }
+
+  /**
+   * Clicks the "Add to bag" button.
+   */
+  async clickAddToCartButton(): Promise<void> {
+    await this.productCTA.clickAddToCart();
+  }
+
+  /**
+   * Retrieves product information from the PDP details section.
+   * @returns An object containing productName and productPrice.
+   */
+  async getProductInfoFromPdpDetails(): Promise<{ productName: string; productPrice: string }> {
+    const productName = await this.productInfo.getTitleText();
+    const productPrice = await this.productInfo.getPriceText();
+
+    return { productName, productPrice };
+  }
+
+  /**
+   * Gets the reviews component
+   * @returns The reviews component
+   */
+  getReviews(): ReviewsComponent {
+    return this.reviews;
+  }
+
+  /**
+   * Clicks the reviews accordion to navigate to the reviews section
+   */
+  async clickReviewsAccordion(): Promise<void> {
+    logger.debug('Clicking reviews accordion');
+    await this.reviews.clickReviewsAccordion();
+  }
+
+  /**
+   * Gets the reviews section locator
+   * @returns The reviews section locator
+   */
+  getReviewsSection(): Locator {
+    return this.reviews.getReviewsSection();
   }
 }

@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 
+import { MiniCartPage } from '../pages/cart/mini-cart-page';
 import { ProductDetailPage } from '../pages/pdp/product-detail-page';
 import { IPageObjectsFixture } from '../types/fixture-types';
 import { logger } from '../utils/logger';
@@ -21,6 +22,19 @@ export const test = base.extend<IPageObjectsFixture>({
       await use(pdp);
     } catch (error) {
       logger.error(`Failed to create ProductDetailPage instance: ${error}`);
+      throw error;
+    }
+  },
+
+  /**
+   * Mini Cart Page fixture
+   */
+  miniCart: async ({ page }: { page: Page }, use: (miniCart: MiniCartPage) => Promise<void>) => {
+    try {
+      const miniCart = new MiniCartPage({ page });
+      await use(miniCart);
+    } catch (error) {
+      logger.error(`Failed to create MiniCartPage instance: ${error}`);
       throw error;
     }
   },

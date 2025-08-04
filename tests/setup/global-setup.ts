@@ -3,7 +3,11 @@ import { chromium, FullConfig } from '@playwright/test';
 import { PATHS } from '../../src/config/constants';
 import { env } from '../../src/config/env';
 import { CookieManager } from '../../src/utils/browser/cookie-manager';
-import { getEnvironmentCountryConfig, getBaseUrl } from '../../src/utils/country-utils';
+import {
+  getEnvironmentCountryConfig,
+  getBaseUrl,
+  parseDeployPreviewUrl,
+} from '../../src/utils/country-utils';
 
 /**
  * Global setup for Playwright tests
@@ -16,6 +20,20 @@ async function globalSetup(_config: FullConfig): Promise<void> {
     console.log('Global setup using environment variables:');
     console.log('COUNTRY:', process.env.COUNTRY);
     console.log('BRANCH:', process.env.BRANCH);
+
+    // Check if we're running against a deploy preview
+    if (env.DEPLOY_PREVIEW_URL) {
+      console.log('DEPLOY_PREVIEW_URL:', env.DEPLOY_PREVIEW_URL);
+
+      // Parse the deploy preview URL and set environment variables
+      const success = parseDeployPreviewUrl(env.DEPLOY_PREVIEW_URL);
+
+      if (success) {
+        console.log('Running tests against deploy preview');
+      } else {
+        console.warn('Failed to parse deploy preview URL, falling back to normal configuration');
+      }
+    }
 
     // Get environment-specific country configuration
     // Make sure to use process.env directly to get the latest values

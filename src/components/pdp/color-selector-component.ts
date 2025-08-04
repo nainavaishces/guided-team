@@ -73,4 +73,12 @@ export class ColorSelectorComponent extends BaseComponent {
     await this.colorLabel.waitFor({ state: 'visible', timeout });
     await this.colorOptions.first().waitFor({ state: 'visible', timeout });
   }
+
+  /**
+   * Selects a color by its value
+   * @param color - The color value to select
+   */
+  async selectColor(color: string): Promise<void> {
+    await this.page.getByLabel(color, { exact: true }).click();
+  }
 }

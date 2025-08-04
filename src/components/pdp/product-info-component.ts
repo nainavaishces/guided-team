@@ -11,7 +11,6 @@ import { BaseComponent } from '../base/base-component';
 export class ProductInfoComponent extends BaseComponent {
   private readonly productTitle: Locator;
   private readonly productPrice: Locator;
-  private readonly productSubtitle: Locator;
   private readonly breadcrumbs: Locator;
 
   /**
@@ -25,7 +24,6 @@ export class ProductInfoComponent extends BaseComponent {
     // Initialize locators
     this.productTitle = this.page.getByTestId('productdescriptionprice-title').nth(1);
     this.productPrice = this.page.getByTestId('productdescriptionprice-price').nth(1);
-    this.productSubtitle = this.page.locator('p[aria-label]');
     this.breadcrumbs = this.page.getByLabel('breadcrumb');
   }
 
@@ -43,14 +41,6 @@ export class ProductInfoComponent extends BaseComponent {
    */
   getPrice(): Locator {
     return this.productPrice;
-  }
-
-  /**
-   * Gets the product subtitle locator
-   * @returns The product subtitle locator
-   */
-  getSubtitle(): Locator {
-    return this.productSubtitle;
   }
 
   /**
@@ -75,22 +65,6 @@ export class ProductInfoComponent extends BaseComponent {
    */
   async getPriceText(): Promise<string> {
     return (await this.productPrice.textContent()) || '';
-  }
-
-  /**
-   * Gets the product subtitle text
-   * @returns Promise resolving to the product subtitle text
-   */
-  async getSubtitleText(): Promise<string> {
-    return (await this.productSubtitle.textContent()) || '';
-  }
-
-  /**
-   * Checks if the breadcrumbs are visible
-   * @returns Promise resolving to true if the breadcrumbs are visible
-   */
-  async areBreadcrumbsVisible(): Promise<boolean> {
-    return await this.breadcrumbs.isVisible();
   }
 
   /**

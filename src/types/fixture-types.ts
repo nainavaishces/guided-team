@@ -1,5 +1,6 @@
 import { Page, Browser, BrowserContext } from '@playwright/test';
 
+import { MiniCartPage } from '../pages/cart/mini-cart-page';
 import { ProductDetailPage } from '../pages/pdp/product-detail-page';
 
 /**
@@ -37,4 +38,9 @@ export interface IPageObjectsFixture {
    * Product Detail Page object
    */
   pdp: ProductDetailPage;
+
+  /**
+   * Mini Cart Page object
+   */
+  miniCart: MiniCartPage;
 }

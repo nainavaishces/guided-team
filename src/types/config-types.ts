@@ -22,6 +22,11 @@ export interface IEnvironmentConfig {
    * The base URL for the application
    */
   BASE_URL: string;
+
+  /**
+   * The deploy preview URL (if running against a deploy preview)
+   */
+  DEPLOY_PREVIEW_URL: string;
 }
 
 /**

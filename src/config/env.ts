@@ -47,4 +47,9 @@ export const env: IEnvironmentConfig = {
   set BASE_URL(value: string) {
     process.env.BASE_URL = value;
   },
+
+  // Deploy Preview URL
+  get DEPLOY_PREVIEW_URL(): string {
+    return getEnv('DEPLOY_PREVIEW_URL', '');
+  },
 };

@@ -13,6 +13,7 @@ A scalable and maintainable test automation framework built with Playwright and 
 - Parallel test execution for faster feedback
 - Country-specific configuration for international testing
 - Authentication state management for efficient testing
+- Deploy preview URL support for testing PR deployments
 
 ## Project Structure
 
@@ -80,6 +81,9 @@ Edit the .env file to set your desired configuration:
 COUNTRY=US          # Country code (e.g., US, GB, DE)
 BRANCH=production   # Environment (production, staging, development)
 HEADLESS=true       # Run browsers in headless mode
+
+# Deploy Preview Configuration
+DEPLOY_PREVIEW_URL= # URL for testing deploy previews (PR deployments)
 ```
 
 These settings control:
@@ -88,6 +92,7 @@ These settings control:
   - The COUNTRY environment variable (which country/domain to test)
   - The BRANCH environment variable (which environment to test)
   - The country configuration in `src/config/country-config.js`
+  - The DEPLOY_PREVIEW_URL (if set) will override the above settings
 
 Default values are provided in `src/config/env.ts` if not specified in .env.
 
@@ -155,6 +160,29 @@ The framework includes support for testing across multiple countries and domains
 - Environment-specific domain configuration
 - Country-specific settings (currency, language, etc.)
 - Cookie management for authentication
+- Deploy preview URL support for testing PR deployments
+
+## Deploy Preview Testing
+
+The framework supports testing against deploy previews (PR deployments):
+
+1. Set the `DEPLOY_PREVIEW_URL` environment variable in your `.env` file:
+
+```
+DEPLOY_PREVIEW_URL=https://deploy-preview-3318.web.vuoriclothing.com
+```
+
+2. Run your tests normally:
+
+```bash
+npm test
+```
+
+The framework will automatically:
+
+- Use the deploy preview URL as the base URL for all tests
+- Configure the appropriate cookie domain
+- Set up authentication for the deploy preview
 
 ## Authentication State Management
 
